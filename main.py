@@ -7,58 +7,6 @@ import pandas as pd
 import plotly.graph_objs as go
 
 
-# ======================================== G D P   F O R E C A S T   G R A P H ==============================
-# historical data
-hist = pd.read_excel('history.xlsx', index_col=None, header=0)
-
-# forecast data
-fct = pd.read_excel('forecast.xlsx', index_col=None, header=0)
-
-# available models
-available_models = list(fct['Model'].unique())
-
-# dates with available forecast periods
-# fct_period = pd.period_range(hist['datetime'].iloc[-1], freq='Q', periods=5)
-fct_period = pd.period_range(hist['datetime'].iloc[-2], freq='Q', periods=6)
-
-
-fct_period = fct_period[1:].asfreq('M', how='E')
-fct_period = fct_period.to_timestamp()
-
-# Colors from tab10 palette
-colors = ['#d62728', '#ff7f0e', '#1f77b4'][::-1] 
-
-# ====================================== G D P   N O W C A S T   G R A P H ==================================
-
-#colors_ncst = ['#37AB65', '#3DF735', '#AD6D70', '#EC2504', '#8C0B90', '#C0E4FF', '#27B502', '#7C60A8', '#CF95D7', '#145JKH']          
-colors_ncst = ['red', 'turquoise', 'gold', 'lime', 'deeppink','mediumblue', 'blanchedalmond', 'lightslategray', 'darkseagreen', 'olive', 'purple']          
-
-ncst = pd.read_excel('nowcast.xlsx', index_col=0, header=0)
-ncst_period = ncst.index
-
-categ = ncst.columns.to_list()
-
-data_ncst = []
-trace = go.Scatter(
-            x = ncst_period,
-            y = ncst['GDP Nowcast'],
-            hoverinfo="y",
-            line={"color": "black","width": 2.5},
-            name = 'GDP Nowcast',
-            marker = {'color': "black"})
-data_ncst.append(trace)
-
-for idx, model in enumerate(ncst.drop(labels='GDP Nowcast', axis=1)):
-    trace = go.Bar(
-            x = ncst_period,
-            y = ncst[model],
-            name = model,
-            marker = {'color': colors_ncst[categ.index(model)]}
-            )            
-    data_ncst.append(trace)
-
-# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
@@ -102,16 +50,6 @@ sidebar = html.Div(
                  dcc.Markdown(
                          """### Compare Macro Forecasts""".replace("  ", ""),              
                          className="title"),                                                            
-                 dcc.Markdown(
-                         """This interactive report icludes state-of-the art forecasting models employed by the  
-                         [Research team @BNB](http://www.bnb.bg/ResearchAndPublications/PubResearch/PubRForecasting/index.htm):
-                             * **ARMA(p,q) model**
-                             * **Dynamic Factor Models (DFM)**
-                             * **Mixed-data sampling (MIDAS)**
-                             * **State Space Model**
-                             * **Unobserved Components Model (UCM)** 
-                             * **Bayesian Vector Autoregression Model (BVAR)** """.replace("  ", ""),
-                         className="subtitle"),
                     ]
                 ), 
         html.Hr(),
@@ -125,16 +63,7 @@ sidebar = html.Div(
             pills=True,
             
         ),
-#        html.Div(
-#            [
-#                 html.A(
-#                        html.Button("Learn More", className="learn-more-button"),
-#                        href="/page-methodology",
-#                        target="_blank",
-#                       )
-#            ],
-#                 className="info-button",
-#        ), 
+
     ],
     style=SIDEBAR_STYLE,
 )
@@ -144,6 +73,12 @@ content = html.Div(id="page-content", style=CONTENT_STYLE)
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
 
+# Make annotations
+@app.callback(Output("text", "children"), [Input("slider", "value")])
+def make_text(value):
+    if value is None:
+        value = 0
+ 
 
 
 if __name__ == "__main__":
