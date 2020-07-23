@@ -25,4 +25,4 @@ app.layout = html.Div(children=[
 )
 
 if __name__ == '__main__':
-    app.run_server(port=8000)
+    app.run_server()
