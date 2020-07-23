@@ -6,10 +6,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
 
-
-
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
-
 
 app.title = 'Forecasts'
 server = app.server
@@ -35,37 +32,7 @@ CONTENT_STYLE = {
 }
 
 sidebar = html.Div(
-    [
-        html.Div(
-                [
-                 html.Div(
-                     [
-                             html.Img(
-                             #src=app.get_asset_url("BNB-logo2.png"),
-                             #className="BNB-logo",
-                             style={'padding': '0px','height': '60%','width': '60%','margin': '0px 80px'}
-                                          )
-                     ]
-                        ), 
-                 dcc.Markdown(
-                         """### Compare Macro Forecasts""".replace("  ", ""),              
-                         className="title"),                                                            
-                    ]
-                ), 
-        html.Hr(),
-        dbc.Nav( # see https://dash-bootstrap-components.opensource.faculty.ai/
-            [
-                dbc.NavLink("GDP", href="/page-gdp", id="page-gdp-link"),
-                dbc.NavLink("Inflation", href="/page-inflation", id="page-inflation-link"),
-                dbc.NavLink("Methodology", href="/page-methodology", id="page-methodology-link"),
-            ],
-            vertical=True,
-            pills=True,
-            
-        ),
 
-    ],
-    style=SIDEBAR_STYLE,
 )
 
 content = html.Div(id="page-content", style=CONTENT_STYLE)
@@ -79,7 +46,6 @@ def make_text(value):
     if value is None:
         value = 0
  
-
 
 if __name__ == "__main__":
     app.run_server()
