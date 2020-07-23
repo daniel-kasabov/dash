@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.title = 'Forecasts'
 server = app.server
@@ -46,6 +46,5 @@ def make_text(value):
     if value is None:
         value = 0
  
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run_server()
