@@ -12,7 +12,7 @@ app.title = 'Forecasts'
 server = app.server
 
 app.layout = html.Div(children=[
-    html.H1(myheading),
+    html.H1('DANIEL'),
 
     ]
 )
