@@ -11,51 +11,13 @@ import plotly.graph_objs as go
 # ========================================================================
 # 1. F O R  G D P   F O R E C A S T   G R A P H
 
-
-    # historical data
-hist = pd.read_excel('https://github.com/daniel-kasabov/dash/raw/master/history.xlsx', index_col=None, header=0)
-
     # forecast data
-fct = pd.read_excel('https://github.com/daniel-kasabov/dash/raw/master/forecast.xlsx', index_col=None, header=0)
-    # available models
-available_models = list(fct['Model'].unique())
-    # dates with available forecast periods
-# fct_period = pd.period_range(hist['datetime'].iloc[-1], freq='Q', periods=5)
-fct_period = pd.period_range(hist['datetime'].iloc[-2], freq='Q', periods=6)
-fct_period = fct_period[1:].asfreq('M', how='E')
-fct_period = fct_period.to_timestamp()
+fct = pd.read_csv('forecast.csv')
+
 
     # Colors from tab10 palette
 colors = ['#d62728', '#ff7f0e', '#1f77b4'][::-1] 
 
-          
-# 2. F O R  N O W C A S T   G R A P H
-#colors_ncst = ['#37AB65', '#3DF735', '#AD6D70', '#EC2504', '#8C0B90', '#C0E4FF', '#27B502', '#7C60A8', '#CF95D7', '#145JKH']          
-colors_ncst = ['red', 'turquoise', 'gold', 'lime', 'deeppink','mediumblue', 'blanchedalmond', 'lightslategray', 'darkseagreen', 'olive', 'purple']          
-
-ncst = pd.read_excel('https://github.com/daniel-kasabov/dash/raw/master/nowcast.xlsx', index_col=0, header=0)
-ncst_period = ncst.index
-
-categ = ncst.columns.to_list()
-
-data_ncst = []
-trace = go.Scatter(
-            x = ncst_period,
-            y = ncst['GDP Nowcast'],
-            hoverinfo="y",
-            line={"color": "black","width": 2.5},
-            name = 'GDP Nowcast',
-            marker = {'color': "black"})
-data_ncst.append(trace)
-
-for idx, model in enumerate(ncst.drop(labels='GDP Nowcast', axis=1)):
-    trace = go.Bar(
-            x = ncst_period,
-            y = ncst[model],
-            name = model,
-            marker = {'color': colors_ncst[categ.index(model)]}
-            )            
-    data_ncst.append(trace)
           
           
 ########### Set up the chart
