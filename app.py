@@ -72,7 +72,7 @@ for idx, model in enumerate(ncst.drop(labels='GDP Nowcast', axis=1)):
 
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
-app.title = app.get_asset_url('favicon.ico')
+app.title = 'favicon.ico'
 server = app.server
 
 
