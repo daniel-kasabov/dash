@@ -105,7 +105,8 @@ sidebar = html.Div(
                  html.Div(
                      [
                              html.Img(
-                             src=app.get_asset_url("BNB-logo2.png"),
+                             src='/assets/BNB-logo2.png',
+                             #src=app.get_asset_url("BNB-logo2.png"),
                              className="BNB-logo",
                              style={'padding': '0px','height': '60%','width': '60%','margin': '0px 80px'}
                                           )
