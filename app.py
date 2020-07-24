@@ -6,13 +6,19 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
 import os
-import urllib2
+
 # ---------------------------- Set up raw data ---------------------------
 # ========================================================================
 # 1. F O R  G D P   F O R E C A S T   G R A P H
+# change working directory
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 
     # historical data
-hist = pd.read_excel(filepath = 'history.xlsx', index_col=None, header=0)
+hist = pd.read_excel('history.xlsx', index_col=None, header=0)
+
+
     # forecast data
 fct = pd.read_excel('forecast.xlsx', index_col=None, header=0)
     # available models
