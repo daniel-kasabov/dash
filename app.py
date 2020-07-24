@@ -67,26 +67,302 @@ for idx, model in enumerate(ncst.drop(labels='GDP Nowcast', axis=1)):
     data_ncst.append(trace)
           
           
-########### Set up the chart
-
-
 ########### Initiate the app
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
-app.title='Forecast'
 
-########### Set up the layout
-app.layout = html.Div(children=[
-    html.H1('DANIEL'),
-    dcc.Graph(
-        id='flyingdog',
-    ),
-    html.A('Code on Github'),
-    html.Br(),
-    html.A('Data Source'),
-    ]
+
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app.title = 'Forecasts'
+server = app.server
+
+
+######### Set up the layout 
+
+# the style arguments for the sidebar. We use position:fixed and a fixed width
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "45rem",
+    "padding": "2rem 0rem",
+    "background-color": "#f3f6fa", ##f8f9fa
+    "font-size": "1.5rem",
+}
+
+# the styles for the main content position it to the right of the sidebar and
+# add some padding.
+CONTENT_STYLE = {
+    "margin-left": "45rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
+sidebar = html.Div(
+    [
+        html.Div(
+                [
+                 html.Div(
+                     [
+                             html.Img(
+                             src=app.get_asset_url("BNB-logo2.png"),
+                             className="BNB-logo",
+                             style={'padding': '0px','height': '60%','width': '60%','margin': '0px 80px'}
+                                          )
+                     ]
+                        ), 
+                 dcc.Markdown(
+                         """### Compare Macro Forecasts""".replace("  ", ""),              
+                         className="title"),                                                            
+                 dcc.Markdown(
+                         """This interactive report icludes state-of-the art forecasting models employed by the  
+                         [Research team @BNB](http://www.bnb.bg/ResearchAndPublications/PubResearch/PubRForecasting/index.htm):
+                             * **ARMA(p,q) model**
+                             * **Dynamic Factor Models (DFM)**
+                             * **Mixed-data sampling (MIDAS)**
+                             * **State Space Model**
+                             * **Unobserved Components Model (UCM)** 
+                             * **Bayesian Vector Autoregression Model (BVAR)** """.replace("  ", ""),
+                         className="subtitle"),
+                    ]
+                ), 
+        html.Hr(),
+        dbc.Nav( # see https://dash-bootstrap-components.opensource.faculty.ai/
+            [
+                dbc.NavLink("GDP", href="/page-gdp", id="page-gdp-link"),
+                dbc.NavLink("Inflation", href="/page-inflation", id="page-inflation-link"),
+                dbc.NavLink("Methodology", href="/page-methodology", id="page-methodology-link"),
+            ],
+            vertical=True,
+            pills=True,
+            
+        ),
+#        html.Div(
+#            [
+#                 html.A(
+#                        html.Button("Learn More", className="learn-more-button"),
+#                        href="/page-methodology",
+#                        target="_blank",
+#                       )
+#            ],
+#                 className="info-button",
+#        ), 
+    ],
+    style=SIDEBAR_STYLE,
 )
 
-if __name__ == '__main__':
+content = html.Div(id="page-content", style=CONTENT_STYLE)
+
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+
+
+# this callback uses the current pathname to set the active state of the
+# corresponding nav link to true, allowing users to tell see page they are on
+@app.callback(
+    [Output(f"page-{i}-link", "active") for i in {'gdp','inflation','methodology'}],
+    [Input("url", "pathname")],
+)
+def toggle_active_links(pathname):
+    if pathname == "/":
+        # Treat page 1 as the homepage / index
+        return True, False, False
+    return [pathname == f"/page-{i}" for i in {'gdp','inflation','methodology'}]
+
+
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+def render_page_content(pathname):
+    if pathname in ["/", "/page-gdp"]:
+        return  html.Div([
+                    html.H1(children='GDP forecast using various econometric models',style={'margin-top':'0px', 'text-align':'center'}),
+                    html.Div([
+                            html.P([
+                                    html.Label('Select model ...'),
+                                    dcc.Checklist(
+                                        id='models-options',
+                                        options=[{'label': i, 'value':i} for i in available_models],
+                                        value=list(fct['Model'].unique()),
+                                        labelStyle={'display': 'inline-block', 'margin': '3px'}
+                                        )],
+                                style={'width': '250px', 'margin-right': 'auto', 'margin-left': 'auto', 'text-align': 'center', 'padding': '-20px 0px 0px 0px'}
+                                    )],
+                            className='input-wrapper'),
+                    dcc.Graph(id="forecast-graph", 
+                              #style={"margin": "20px 20px", "height": "45vh",'width': '75%'},
+                              style={'width': '85%', 'height': '60vh', 'margin-right': 'auto', 'margin-left': 'auto'},
+                              config={
+                                      'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                                                 'pan2d', 'toggleSpikelines',
+                                                                 'hoverCompareCartesian',   
+                                                                 'zoomOut2d', 'zoomIn2d',
+                                                                 'hoverClosestCartesian',
+                                                                 # 'sendDataToCloud',
+                                                                 'resetScale2d']}
+                                ),
+                    html.P([
+                            html.Label('Select year ...'),
+                            dcc.RangeSlider(
+                                    id = 'year-slider',
+                                    min = hist['datetime'].dt.year.min(),
+                                    #max = fct_period.year.max(),
+                                    max = hist['datetime'].dt.year.max(),        
+                                    value = [2010, fct_period.year.max()],
+                                    marks = {str(year): str(year) for year in range(hist['datetime'].dt.year.min(), hist['datetime'].dt.year.max(),2)}                                   ), 
+                                    ],
+                            style={'width': '70%', 'margin-right': 'auto', 'margin-left': 'auto', 'padding': '0px 0px 10px 10px'}),
+                    html.H1(children='GDP nowcast for Q2 2020',style={'margin-top':'20px', 'text-align':'center'}),    
+                    dcc.Graph(id='nowcast-graph',
+                              style={'width': '85%', 'height': '60vh', 'margin-right': 'auto', 'margin-left': 'auto'},
+                              figure={
+                                      "data": data_ncst,
+                                      "layout": go.Layout(
+                                              barmode="relative",
+                                              #title = 'GDP nowcast (qoq, %)',
+                                              #legend = {'orientation': 'h', "x": 0.5, 'xanchor': 'center'},
+                                              #height = 400,
+                                              margin = {'l': 50,'r': 50,'t': 40},
+                                              hovermode = 'closest',                                              
+                                              xaxis = {'tickangle': -90,
+                                                      'showgrid': True,
+                                                          #'title': 'Time'
+                                                      },
+                                              yaxis = {'title': '(qoq, %)',
+                                                       'showgrid': True,
+                                                       #'range': [-1, 3]
+                                                       },         
+                                            # font = {
+                                                    #"family": "Roboto",
+                                                    # "size": 14
+                                                    # }
+                                                        )
+                                      }
+                              ),
+                     dcc.Markdown(''' 
+                                   Notes:                                                     
+                                      - The nowcast stands at -3.8% (qoq) for 2020:Q2.                                 
+                                      - News from mid-May data releases pointed to a decline of around -6.4% (qoq), driven by negative news from surveys, labour market and turnover statistics.                                             
+                                  ''')                 
+                                      
+  
+            ],
+            id="page",
+            className="ten columns",
+        )
+    elif pathname == "/page-inflation":
+        return html.P("This is the content of page Inflation. Yay!")
+    elif pathname == "/page-methodology":
+        return html.P("Oh cool, this is page Methodology!")
+    # If the user tries to reach a different page, return a 404 message
+    return dbc.Jumbotron(
+        [
+            html.H1("404: Not found", className="text-danger"),
+            html.Hr(),
+            html.P(f"The pathname {pathname} was not recognised..."),
+        ]
+    )
+    
+    
+@app.callback(
+    dash.dependencies.Output('forecast-graph', 'figure'),
+    [dash.dependencies.Input('models-options', 'value'),
+     dash.dependencies.Input('year-slider', 'value')])
+
+
+def update_graph(selected_models, year_value):
+
+    # data for the graph
+    data = []
+    trace = {
+            'x': hist.loc[(hist['datetime'].dt.year >= year_value[0]) & (hist['datetime'].dt.year <= year_value[1]), 'datetime'],
+            'y': hist.loc[(hist['datetime'].dt.year >= year_value[0]) & (hist['datetime'].dt.year <= year_value[1]), 'GDP'],
+            'type': 'scatter',
+            'mode': 'lines+markers',
+            'name': 'Historical data',
+            'line': {'color': 'rgb(33, 33, 33)'}
+            }
+    data.append(trace)
+
+    for idx, model in enumerate(selected_models):
+        trace = {
+                'x': fct_period,
+                #'y': fct.loc[(fct['Model'] == model) & (fct['name'] == 'Baseline'),'Q1':'Q4'].mean(),
+                'y': hist['GDP'].tail(1).append(fct.loc[(fct['Model'] == model) & (fct['name'] == 'Baseline'),'Q1':'Q4'].mean()),
+                'showlegend': False,
+                'type': 'scatter',
+                'mode': 'lines+markers',
+                'name': model,
+                'line': {'color': colors[idx]}
+                }
+        data.append(trace)
+
+    # for idx, band in enumerate(models list):
+    for idx, model in enumerate(selected_models):
+        trace = {
+                'x': fct_period,
+                #'y': fct.loc[(fct['Model'] == model) & (fct['name'] == 'Low'),'Q1':'Q4'].min(),
+                'y': hist['GDP'].tail(1).append(fct.loc[(fct['Model'] == model) & (fct['name'] == 'Low'),'Q1':'Q4'].min()),
+                'showlegend': False,
+                'type': 'scatter',
+                'mode': 'lines',
+                'name': 'min {}'.format(model),
+                'line': {'color': colors[idx],
+                         'width': 0.5},
+                         }
+        data.append(trace)
+
+        trace = {
+                'x': fct_period,
+                #'y': fct.loc[(fct['Model'] == model) & (fct['name'] == 'High'),'Q1':'Q4'].max(),
+                'y': hist['GDP'].tail(1).append(fct.loc[(fct['Model'] == model) & (fct['name'] == 'High'),'Q1':'Q4'].max()),
+                'type': 'scatter',
+                'fill': 'tonexty',
+                'mode': 'lines',
+                'name': model,
+                'line': {'color': colors[idx],
+                         'width': 0.5}
+                }
+        data.append(trace)  
+
+    return {
+        'data': data,
+        'layout': {
+            #'title': 'Observed & Projected GDP Growth (qoq, %)',    
+            'legend': {
+                'orientation': 'h',
+                "x": 0.5,
+                'xanchor': 'center'
+            },
+#            'height': 400,
+            'margin': {
+                'l': 50,
+                'r': 50,
+                't': 40
+            },
+            'hovermode': 'closest',
+            'yaxis': {
+                'title': '(qoq, %)',
+                'showgrid': True,
+                'range': [-5, 4]
+#                'range': [hist.loc[(hist['datetime'].dt.year >= year_value[0]), 'GDP'].min()-2, hist.loc[(hist['datetime'].dt.year >= year_value[0]), 'GDP'].max()+2]
+            },
+            'xaxis': {
+                'showgrid': True,
+            #    'rangeslider': {'visible':True}
+            #    'title': 'Time'
+            },
+            # "font": {
+            #     "family": "Roboto",
+            #     "size": 14
+            # }
+        }
+    }
+
+# Make annotations
+@app.callback(Output("text", "children"), [Input("slider", "value")])
+def make_text(value):
+    if value is None:
+        value = 0
+ 
+
+
+if __name__ == "__main__":
     app.run_server()
