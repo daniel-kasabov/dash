@@ -71,7 +71,7 @@ for idx, model in enumerate(ncst.drop(labels='GDP Nowcast', axis=1)):
 ########### Initiate the app
 
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True, static_folder='assets')
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = 'Forecasts'
 server = app.server
 
