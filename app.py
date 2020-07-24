@@ -1,9 +1,30 @@
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
+import pandas as pd
 import plotly.graph_objs as go
 
-########### Define your variables
+# ---------------------------- Set up raw data ---------------------------
+# ========================================================================
+
+    # historical data
+hist = pd.read_excel('history.xlsx', index_col=None, header=0)
+    # forecast data
+fct = pd.read_excel('forecast.xlsx', index_col=None, header=0)
+    # available models
+available_models = list(fct['Model'].unique())
+    # dates with available forecast periods
+# fct_period = pd.period_range(hist['datetime'].iloc[-1], freq='Q', periods=5)
+fct_period = pd.period_range(hist['datetime'].iloc[-2], freq='Q', periods=6)
+fct_period = fct_period[1:].asfreq('M', how='E')
+fct_period = fct_period.to_timestamp()
+
+    # Colors from tab10 palette
+colors = ['#d62728', '#ff7f0e', '#1f77b4'][::-1] 
+
+########### Set up the chart
 
 
 ########### Initiate the app
@@ -15,6 +36,9 @@ app.title='Forecast'
 ########### Set up the layout
 app.layout = html.Div(children=[
     html.H1('DANIEL'),
+    dcc.Graph(
+        id='flyingdog',
+    ),
     html.A('Code on Github'),
     html.Br(),
     html.A('Data Source'),
