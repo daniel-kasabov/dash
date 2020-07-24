@@ -5,22 +5,22 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
-import os
+import pathlib
+
+# get relative data folder
+DATA_PATH = pathlib.Path(__file__).parent
+
 
 # ---------------------------- Set up raw data ---------------------------
 # ========================================================================
 # 1. F O R  G D P   F O R E C A S T   G R A P H
-# change working directory
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-os.chdir(dname)
+
 
     # historical data
-hist = pd.read_excel('history.xlsx', index_col=None, header=0)
-
+hist = pd.read_excel(DATA_PATH.joinpath("history.xlsx"))
 
     # forecast data
-fct = pd.read_excel('forecast.xlsx', index_col=None, header=0)
+fct = pd.read_excel(DATA_PATH.joinpath('forecast.xlsx'), index_col=None, header=0)
     # available models
 available_models = list(fct['Model'].unique())
     # dates with available forecast periods
@@ -37,7 +37,7 @@ colors = ['#d62728', '#ff7f0e', '#1f77b4'][::-1]
 #colors_ncst = ['#37AB65', '#3DF735', '#AD6D70', '#EC2504', '#8C0B90', '#C0E4FF', '#27B502', '#7C60A8', '#CF95D7', '#145JKH']          
 colors_ncst = ['red', 'turquoise', 'gold', 'lime', 'deeppink','mediumblue', 'blanchedalmond', 'lightslategray', 'darkseagreen', 'olive', 'purple']          
 
-ncst = pd.read_excel('nowcast.xlsx', index_col=0, header=0)
+ncst = pd.read_excel(DATA_PATH.joinpath('nowcast.xlsx'), index_col=0, header=0)
 ncst_period = ncst.index
 
 categ = ncst.columns.to_list()
