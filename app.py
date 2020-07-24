@@ -5,7 +5,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.graph_objs as go
-
+from datetime import datetime
 
 # ---------------------------- Set up raw data ---------------------------
 # ========================================================================
@@ -13,9 +13,10 @@ import plotly.graph_objs as go
 
 
     # historical data
-# hist = pd.read_excel('history.xlsx', index_col=None, header=0)
+#hist = pd.read_excel('history.xlsx', index_col=None, header=0)
 hist = pd.read_csv('history.csv', index_col=None, header=0)
 hist.dropna(subset=['datetime', 'GDP'], inplace = True)
+hist['datetime'] = pd.to_datetime(hist.datetime, format='%d/%m/%Y')
 
     # forecast data
 # fct = pd.read_excel('forecast.xlsx', index_col=None, header=0)
@@ -38,7 +39,7 @@ colors = ['#d62728', '#ff7f0e', '#1f77b4'][::-1]
 #colors_ncst = ['#37AB65', '#3DF735', '#AD6D70', '#EC2504', '#8C0B90', '#C0E4FF', '#27B502', '#7C60A8', '#CF95D7', '#145JKH']          
 colors_ncst = ['red', 'turquoise', 'gold', 'lime', 'deeppink','mediumblue', 'blanchedalmond', 'lightslategray', 'darkseagreen', 'olive', 'purple']          
 
-# ncst = pd.read_excel('nowcast.xlsx', index_col=0, header=0)
+#ncst = pd.read_excel('nowcast.xlsx', index_col=0, header=0)
 ncst = pd.read_csv('nowcast.csv', index_col=0, header=0)
 ncst.dropna(subset=['GDP Nowcast'], inplace = True)
 
