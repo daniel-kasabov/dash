@@ -10,10 +10,7 @@ import plotly.graph_objs as go
 # ---------------------------- Set up raw data ---------------------------
 # ========================================================================
 # 1. F O R  G D P   F O R E C A S T   G R A P H
-proxy = {
-    'http': 'http://172.27.0.20:8080',
-    'https': 'http://172.27.0.20:8080',
-}
+
 
     # historical data
 hist = pd.read_excel('https://github.com/daniel-kasabov/dash/raw/master/history.xlsx', index_col=None, header=0)
