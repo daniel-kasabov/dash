@@ -130,9 +130,9 @@ sidebar = html.Div(
         html.Hr(),
         dbc.Nav( # see https://dash-bootstrap-components.opensource.faculty.ai/
             [
-                dbc.NavLink("GDP", href="/page-gdp", id="page-gdp-link"),
-                dbc.NavLink("Inflation", href="/page-inflation", id="page-inflation-link"),
-                dbc.NavLink("Methodology", href="/page-methodology", id="page-methodology-link"),
+                dbc.NavLink("GDP", href="/page-gdp", id="page-gdp-link", external_link=True),
+                dbc.NavLink("Inflation", href="/page-inflation", id="page-inflation-link", external_link=True),
+                dbc.NavLink("Methodology", href="/page-methodology", id="page-methodology-link", external_link=True),
             ],
             vertical=True,
             pills=True,
