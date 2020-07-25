@@ -84,7 +84,7 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "35rem",
+    "width": "45rem",
     "padding": "2rem 0rem",
     "background-color": "#f3f6fa", ##f8f9fa
     "font-size": "1.5rem",
@@ -210,10 +210,10 @@ def render_page_content(pathname):
                                     value = [2010, fct_period.year.max()],
                                     marks = {str(year): str(year) for year in range(hist['datetime'].dt.year.min(), hist['datetime'].dt.year.max(),2)}                                   ), 
                                     ],
-                            style={'width': '60%', 'margin-right': 'auto', 'margin-left': 'auto', 'padding': '0px 0px 10px 10px'}),
+                            style={'width': '70%', 'margin-right': 'auto', 'margin-left': 'auto', 'padding': '0px 0px 10px 10px'}),
                     html.H1(children='GDP nowcast for Q2 2020',style={'margin-top':'20px', 'text-align':'center'}),    
                     dcc.Graph(id='nowcast-graph',
-                              style={'width': '75%', 'height': '50vh', 'margin-right': 'auto', 'margin-left': 'auto'},
+                              style={'width': '85%', 'height': '60vh', 'margin-right': 'auto', 'margin-left': 'auto'},
                               figure={
                                       "data": data_ncst,
                                       "layout": go.Layout(
