@@ -135,7 +135,7 @@ sidebar = html.Div(
                 dbc.NavLink("Methodology", href="/page-methodology", id="page-methodology-link", external_link=True),
             ],
             vertical=True,
-            pills=True,
+            pills=False,
             
         ),
 #        html.Div(
